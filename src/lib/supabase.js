@@ -8,9 +8,23 @@ console.log('🔍 Supabase config:', {
     key: supabaseAnonKey ? 'Set' : 'Not set'
 })
 
-if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('❌ Supabase environment variables not configured!')
-    throw new Error('Supabase environment variables not configured')
+// Create a fallback client for build time
+const createSupabaseClient = () => {
+    if (!supabaseUrl || !supabaseAnonKey) {
+        console.warn('⚠️ Supabase environment variables not configured, using fallback client')
+        // Return a mock client for build time
+        return createClient(
+            'https://placeholder.supabase.co',
+            'placeholder-key',
+            {
+                auth: {
+                    persistSession: false
+                }
+            }
+        )
+    }
+    
+    return createClient(supabaseUrl, supabaseAnonKey)
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createSupabaseClient()
